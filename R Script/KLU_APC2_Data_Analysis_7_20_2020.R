@@ -4,22 +4,13 @@ pacman::p_load(rio)
 library(tibble)
 # IMPORTING Data ###########################################################
 data <- import("~/Desktop/GitHub/KLU_APC2_Jinghang_Mountz_7_20_2020/Appending_to_Master/KLU_APC2_Master_2020_07_01.xlsx")
-Scan_Number <- import("~/Desktop/GitHub/KLU_APC2_Jinghang_Mountz_7_20_2020/Appending_to_Master/NormalAging_DataGathering.xlsx")
 activation <- import("~/Desktop/GitHub/KLU_APC2_Jinghang_Mountz_7_20_2020/Appending_to_Master/activ_values.txt")
 AI <- import("~/Desktop/GitHub/KLU_APC2_Jinghang_Mountz_7_20_2020/Appending_to_Master/AI.txt")
 FWHM <- import("~/Desktop/GitHub/KLU_APC2_Jinghang_Mountz_7_20_2020/Appending_to_Master/FWHM.txt")
 FWHM <- abs(FWHM)
 # Filter Data ##############################################################
-data <- data[-c(which(data$FaceNames_Exclude == 'Yes')),] #Exclude for scanning issues
-
-list <- match(Scan_Number$ScanID,data$Vault_Scan_ID) #Only include 1 scan/subject
-index <- which(list!=0,arr.ind = T)
-list <- na.omit(match(Scan_Number$ScanID, data$Vault_Scan_ID))
-data$Scan_Number <- NA
-data$Scan_Number[list] <- Scan_Number$`Scan Number`[index]
-data <- data[c(which(data$Scan_Number == 1)),]
-
-list <- match(activation$Scan_ID,data$Vault_Scan_ID) #Match up all calculated valuese with correct scan
+data <- data[is.na(data$FaceNames_Exclude) & data$Visit_Relative == 1,] #Issues with face name data and only 1 scan/subject - 87 observations
+list <- match(activation$Scan_ID,data$Vault_Scan_ID)
 index <- which(list!=0,arr.ind = T)
 list <- na.omit(match(activation$Scan_ID, data$Vault_Scan_ID))
 
@@ -47,10 +38,10 @@ data$Right_DLPFC_Activation[list] <- activation[,6][index]
 data$Hippocampus_AI[list] <- AI[,3][index]
 data$DLPFC_AI[list] <- AI[,4][index]
 
-data$Left_Hippocampus_FWHM[list] <- FWHM[,3]
-data$Right_Hippocampus_FWHM[list] <- FWHM[,4]
-data$Left_DLPFC_FWHM[list] <- FWHM[,5]
-data$Right_DLPFC_FWHM[list] <- FWHM[,6]
+data$Left_Hippocampus_FWHM[list] <- FWHM[,3][index]
+data$Right_Hippocampus_FWHM[list] <- FWHM[,4][index]
+data$Left_DLPFC_FWHM[list] <- FWHM[,5][index]
+data$Right_DLPFC_FWHM[list] <- FWHM[,6][index]
 # Recode Variables ##############################################################
 data$Race_cat <- data$Race != 'White' #not white = 1 (True)
 data$Education_cat <- data$Education > 12  #higher education = 1 (True)
